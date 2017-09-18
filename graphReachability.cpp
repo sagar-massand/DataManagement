@@ -35,6 +35,8 @@ using namespace std;
 
 #define DEBUG true
 
+#define CACHE_CONSTRAINT 4
+
 class Node {
 public:
 	std::vector<std::string> attributes;
@@ -112,30 +114,25 @@ public:
 			nodeIds.insert(currentEdge.start);
 			nodeIds.insert(currentEdge.end);
 
-			std::map<int, std::vector<Edge> >::iterator it = adjacencyList.find(currentEdge.start);
-			if(it != adjacencyList.end()) {
-				std::vector<Edge> v = adjacencyList.find(currentEdge.start)->second;
-				v.push_back(currentEdge);
-				adjacencyList[currentEdge.start] = v;
-			} else {
-				std::vector<Edge> v;
-				v.push_back(currentEdge);
-				adjacencyList[currentEdge.start] = v;
-			}
-
-			it = adjacencyList.find(currentEdge.end);
-			if(it != adjacencyList.end()) {
-				std::vector<Edge> v = adjacencyList.find(currentEdge.end)->second;
-				v.push_back(currentEdge);
-				adjacencyList[currentEdge.end] = v;
-			} else {
-				std::vector<Edge> v;
-				v.push_back(currentEdge);
-				adjacencyList[currentEdge.end] = v;
-			}
+			pushEdgeToAdjacencyList(currentEdge);
+			Edge modifiedEdge = Edge(currentEdge.end, currentEdge.start, currentEdge.label);
+			pushEdgeToAdjacencyList(modifiedEdge);
 		}
 		edgeSize = edges.size();
 		vertexSize = nodeIds.size();
+	}
+
+	void pushEdgeToAdjacencyList(Edge currentEdge) {
+		std::map<int, std::vector<Edge> >::iterator it = adjacencyList.find(currentEdge.start);
+		if(it != adjacencyList.end()) {
+			std::vector<Edge> v = adjacencyList.find(currentEdge.start)->second;
+			v.push_back(currentEdge);
+			adjacencyList[currentEdge.start] = v;
+		} else {
+			std::vector<Edge> v;
+			v.push_back(currentEdge);
+			adjacencyList[currentEdge.start] = v;
+		}
 	}
 
 	/*
@@ -171,16 +168,68 @@ public:
 		std::vector<Edge> v;
 		return v;
 	}
+
+	int findBfsDistance(int start, int end, int label) {
+		if (start == end) {
+			return 0;
+		}
+		//For simplicity, nodes assumed
+		map<int, int> nodeDist;
+		for (set<int>::iterator it = nodeIds.begin();it != nodeIds.end();it++) {
+			nodeDist[*it] = inf;
+		}
+		queue q;
+		q.push(start);
+		nodeDist[start] = 0;
+		while (!q.empty()) {
+			int front = q.front();
+			std::vector<Edge> edges = getEdges(front);
+			if (edges.size() == 0) {
+				continue;
+			}
+			for (int i = 0; i < edges.size();i++) {
+				if ((nodeDist[edges[i].end] == inf) || (edges[i].label != label)) {
+					continue;
+				}
+				nodeDist[edges[i].end] = nodeDist[front] + 1;
+				if (edges[i].end == end) {
+					return nodeDist[edges[i].end];
+				}
+				q.push(edges[i].end);
+			}
+		}
+	}
+
+	bool isReachable(int start, int end, int label, int distance) {
+		return (findBfsDistance(start, end, label) <= distance);
+	}
 };
+
+class LandmarkGraph: public Graph {
+
+}
 
 class FanGraph: public Graph {
 public:
 	//Hack using string for the edge, will correct later if better solution found.
 	map<string, int> reachabilityMap;
+	int graphCacheConstraint;
 	FanGraph(Graph g) {
 		copy(g);
-
+		graphCacheConstraint = CACHE_CONSTRAINT * vertexSize * vertexSize;
 	}
+
+	bool isReachable(int start, int end, int label, int distance) {
+		Edge e = Edge(start, end, label);
+		if(reachabilityMap.find(e.toString()) != reachabilityMap.end()) {
+			return (reachabilityMap.find(e.toString())->second <= distance);
+		} else {
+			int bfsDistance = findBfsDistance(start, end, label);
+			return bfsDistance <= distance;
+		}
+	}
+
+	//Assume for now that the method doing the modification in LRU cache is present, 
 };
 
 /**This is a utility class, which is stateless**/
@@ -223,10 +272,14 @@ void testEdgeMap() {
 	}
 }
 
+void testBfs() {
+
+}
+
 int main() {
-	testEdgeMap();
-	// srand(time(NULL));
-	// Graph g = RandomGraph::buildRandomGraph(20, 3);
-	// printf("Random printing done.");
-	// g.printGraphEdges();
+	//testEdgeMap();
+	srand(time(NULL));
+	Graph g = RandomGraph::buildRandomGraph(20, 3);
+	printf("Random printing done.");
+	g.printGraphEdges();
 }

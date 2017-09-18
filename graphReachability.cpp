@@ -178,17 +178,18 @@ public:
 		for (set<int>::iterator it = nodeIds.begin();it != nodeIds.end();it++) {
 			nodeDist[*it] = inf;
 		}
-		queue q;
+		queue<int> q;
 		q.push(start);
 		nodeDist[start] = 0;
 		while (!q.empty()) {
 			int front = q.front();
+			q.pop();
 			std::vector<Edge> edges = getEdges(front);
 			if (edges.size() == 0) {
 				continue;
 			}
 			for (int i = 0; i < edges.size();i++) {
-				if ((nodeDist[edges[i].end] == inf) || (edges[i].label != label)) {
+				if ((nodeDist[edges[i].end] != inf) || (edges[i].label != label)) {
 					continue;
 				}
 				nodeDist[edges[i].end] = nodeDist[front] + 1;
@@ -198,6 +199,7 @@ public:
 				q.push(edges[i].end);
 			}
 		}
+		return nodeDist[end];
 	}
 
 	bool isReachable(int start, int end, int label, int distance) {
@@ -207,7 +209,7 @@ public:
 
 class LandmarkGraph: public Graph {
 
-}
+};
 
 class FanGraph: public Graph {
 public:
@@ -273,13 +275,25 @@ void testEdgeMap() {
 }
 
 void testBfs() {
-
+	std::vector<Edge> edges;
+	edges.push_back(Edge(1,2,0));
+	edges.push_back(Edge(1,3,1));
+	edges.push_back(Edge(2,4,0));
+	edges.push_back(Edge(4,6,0));
+	edges.push_back(Edge(3,5,1));
+	edges.push_back(Edge(6,3,0));
+	std::vector<Node> nodes;
+	Graph g = Graph(edges, nodes);
+	cout << g.findBfsDistance(1,3,0) << endl;
+	cout << g.findBfsDistance(1,3,1) << endl;
+	cout << g.findBfsDistance(1,5,0) << endl;
 }
 
 int main() {
 	//testEdgeMap();
-	srand(time(NULL));
-	Graph g = RandomGraph::buildRandomGraph(20, 3);
-	printf("Random printing done.");
-	g.printGraphEdges();
+	testBfs();
+	// srand(time(NULL));
+	// Graph g = RandomGraph::buildRandomGraph(20, 3);
+	// printf("Random printing done.");
+	// g.printGraphEdges();
 }

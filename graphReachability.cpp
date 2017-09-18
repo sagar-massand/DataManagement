@@ -2,9 +2,10 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<algorithm>
-#include<string.h>
+#include<string>
 #include<math.h>
 #include<time.h>
+#include<sstream>
 #include<queue>
 #include<vector>
 #include<stack>
@@ -59,6 +60,25 @@ public:
 		this->end = en;
 		this->label = la;
 	}
+
+	string toString() {
+		std::ostringstream oss;
+		oss << start << "_" << end << "_" << label;
+		return oss.str();
+	}
+
+	// bool operator==(Edge& other)const{
+ //        if (this->start != other.start) {
+ //        	return false;
+ //        }
+ //        if (this->end != other.end) {
+ //        	return false;
+ //        }
+ //        if (this->label != other.label) {
+ //        	return false;
+ //        }
+ //        return true;
+ //    }
 };
 
 class Graph {
@@ -78,15 +98,15 @@ public:
 		init();
 	}
 
-	Graph(std::vector<Edge> edges) {
+	void copy(Graph g) {
+		vertexSize = g.vertexSize;
+		edgeSize = g.edgeSize;
+		nodeIds = g.nodeIds;
+		adjacencyList = g.adjacencyList;
+		nodeMap = g.nodeMap;
 	}
 
-	/*
-		The vector of nodes is an optional parameter which may or may not be passed depending on whether there are attributes which need to be
-		checked.
-	*/
-	Graph(std::vector<Edge> edges, std::vector<Node> nodes) {
-		init();
+	void createNodesAndEdges(std::vector<Edge> edges, std::vector<Node> nodes) {
 		for(int i = 0; i < edges.size();i++) {
 			Edge currentEdge = edges[i];
 			nodeIds.insert(currentEdge.start);
@@ -118,6 +138,15 @@ public:
 		vertexSize = nodeIds.size();
 	}
 
+	/*
+		The vector of nodes is an optional parameter which may or may not be passed depending on whether there are attributes which need to be
+		checked.
+	*/
+	Graph(std::vector<Edge> edges, std::vector<Node> nodes) {
+		init();
+		createNodesAndEdges(edges, nodes);
+	}
+
 	void printGraphEdges() {
 		set<int>::iterator it = nodeIds.begin();
 		for(set<int>::iterator it = nodeIds.begin(); it != nodeIds.end(); ++it) {
@@ -144,9 +173,12 @@ public:
 	}
 };
 
-class FanGraph {
+class FanGraph: public Graph {
 public:
+	//Hack using string for the edge, will correct later if better solution found.
+	map<string, int> reachabilityMap;
 	FanGraph(Graph g) {
+		copy(g);
 
 	}
 };
@@ -178,10 +210,23 @@ public:
 	}
 };
 
+void testEdgeMap() {
+	map<string, int> reachabilityMap;
+	Edge e1 = Edge(1,2,3);
+	Edge e2 = Edge(1,2,3);
+	reachabilityMap.insert(std::pair<string, int>(e1.toString(), 10));
+	std::map<string, int>::iterator it = reachabilityMap.find(e2.toString());
+	if (it != reachabilityMap.end()) {
+		printf("Success\n");
+	} else {
+		printf("Failure\n");
+	}
+}
 
 int main() {
-	srand(time(NULL));
-	Graph g = RandomGraph::buildRandomGraph(20, 3);
-	printf("Random printing done.");
-	g.printGraphEdges();
+	testEdgeMap();
+	// srand(time(NULL));
+	// Graph g = RandomGraph::buildRandomGraph(20, 3);
+	// printf("Random printing done.");
+	// g.printGraphEdges();
 }

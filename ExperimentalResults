@@ -1,0 +1,18 @@
+Experimental results on terrorist database:
+Label distribution: 4:1
+(CACHE_CONSTRAINT = 10)
+Old algo, 1000 queries : 166555.000000
+New algo, 1000 queries : 161462.000000
+
+(CACHE_CONSTRAINT = 4)
+Old algo, 1000 queries : 166175.000000
+New algo, 1000 queries : 171206.000000
+
+(CACHE_CONSTRAINT = 4)
+Old algo, 10000 queries : 1692429.000000
+New algo, 10000 queries : 1515966.000000
+
+(CACHE_CONSTRAINT = 10)
+Old algo, 10000 queries : 1641641.000000
+New algo, 10000 queries : 1452591.000000
+

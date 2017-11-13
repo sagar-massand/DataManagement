@@ -1,0 +1,5 @@
+graphReachability.cpp is the main code file which has 2 classes: LandmarkGraph and FanGraph for the new implementation and the old implementation respectively. There's a dependency on the boost library which provides the functionality for the LRU cache which needs to be added outside of the code folder in a folder named "boost". Assuming this dependency, compile.sh does compilation using the boost library. 
+
+completeGraph is the input to the graphReachability code which consists of the data compiled from UMD terrorist database. The labels 0 and 1 have been assigned in a 0.8:0.2 probability ratio to these edges. 
+
+labelLandmarkVertices.cpp is the slightly different attempt with landmark vertices based on a particular label, and storing reachability information only for that particular label.

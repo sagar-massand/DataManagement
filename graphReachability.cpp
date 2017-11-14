@@ -46,7 +46,9 @@ using namespace std;
 
 #define ASSERT_DEBUG false
 
-#define CACHE_CONSTRAINT 10
+#define RANDOM_GRAPH_PRINTING true
+
+#define CACHE_CONSTRAINT 4
 
 
 bool compare(std::pair<string, int> const &a, std::pair<string, int> const &b) {
@@ -873,7 +875,7 @@ public:
 					continue;
 				}
 				float prob = ((float)rand())/((float)RAND_MAX);
-				if (prob < 0.1) {
+				if (prob < 0.005) {
 					int label = (rand()%numLabels);
 					edges.push_back(Edge(std::to_string(i), std::to_string(j), std::to_string(label)));
 					if (DEBUG) {
@@ -883,14 +885,32 @@ public:
 			}
 		}
 		printf("Vertices = %d, Edges = %lu, Labels = %d\n", numVertices, edges.size(), numLabels);
+		printf("Building random graphs\n");
+		cout << numVertices << endl;
+		cout << edges.size() << endl;
+		cout << numLabels << endl;
 		std::vector<Node> nodes;
 		for(int i = 0; i < numVertices; i++) {
 			Node temp = Node(std::to_string(i));
 			nodes.push_back(temp);
+			if (RANDOM_GRAPH_PRINTING) {
+				cout << std::to_string(i) << endl;
+			}
 		}
 		std::vector<string> labels;
 		for (int i = 0; i < numLabels; i++) {
 			labels.push_back(std::to_string(i));
+			if (RANDOM_GRAPH_PRINTING) {
+				cout << std::to_string(i) << endl;
+			}
+		}
+		if (RANDOM_GRAPH_PRINTING) {
+			for(int i = 0; i < edges.size(); i++) {
+				Edge e = edges[i];
+				cout << e.start << endl;
+				cout << e.end << endl;
+				cout << e.label << endl;
+			}
 		}
 		Graph g = Graph(edges, nodes, labels, numVertices, numLabels);
 		return g;	
@@ -995,7 +1015,7 @@ int main() {
 	Graph g = getGraph(randomGraph);
 	LandmarkGraph lg = LandmarkGraph(g);
 	FanGraph fg = FanGraph(g);
-	
+
 	if (randomQueries == 1) {
 		string **queries = generateRandomQueries(g, numQueries);
 		clock_t lgStart = clock();
@@ -1051,6 +1071,9 @@ int main() {
 			cout << "Landmark graph value is " << lgReachable << " Fan graph value is " <<  fgReachable << endl;
 		}
 	}
+
+
+
 	// if (newAlgo > 0) {
 	// 	LandmarkGraph lg = LandmarkGraph(g);
 	// 	clock_t lgStart = clock();

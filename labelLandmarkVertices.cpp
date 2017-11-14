@@ -45,7 +45,7 @@ using namespace std;
 
 #define ASSERT_DEBUG false
 
-#define CACHE_CONSTRAINT 4
+#define CACHE_CONSTRAINT 5
 
 
 bool compare(std::pair<string, int> const &a, std::pair<string, int> const &b) {
@@ -941,13 +941,13 @@ int main() {
 		clock_t lgEnd = clock();
 		printf("Time taken for new algo = %lf\n", (double)(lgEnd - lgStart)/(double)(CLOCKS_PER_SEC));
 
-		clock_t fgStart = clock();
-		for(int i = 0; i < numQueries; i++) {
-			//cout << "Query is " << queries[i][0] <<" " << queries[i][1] << " " << queries[i][2] << " " << queries[i][3] << endl; 
-			bool fgReachable =  fg.isReachable(queries[i][0],queries[i][1],queries[i][2],stoi(queries[i][3]));
-		}
-		clock_t fgEnd = clock();
-		printf("Time taken for old algo = %lf\n", (double)(fgEnd - fgStart)/(double)(CLOCKS_PER_SEC));
+		// clock_t fgStart = clock();
+		// for(int i = 0; i < numQueries; i++) {
+		// 	//cout << "Query is " << queries[i][0] <<" " << queries[i][1] << " " << queries[i][2] << " " << queries[i][3] << endl; 
+		// 	bool fgReachable =  fg.isReachable(queries[i][0],queries[i][1],queries[i][2],stoi(queries[i][3]));
+		// }
+		// clock_t fgEnd = clock();
+		// printf("Time taken for old algo = %lf\n", (double)(fgEnd - fgStart)/(double)(CLOCKS_PER_SEC));
 	} else {
 		string start, end, label, distance;
 		printf("Enter queries in start, end, label and distance format\n");

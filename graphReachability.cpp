@@ -537,6 +537,9 @@ public:
 				if (frontEdges[i].end == end) {
 					return (nodeDist[end] <= distance);
 				}
+				if (revNodeDist.find(frontEdges[i].end) != revNodeDist.end()) {
+					return ((nodeDist[frontEdges[i].end] + revNodeDist[frontEdges[i].end]) <= distance);
+				}
 				if (isLandmarkVertex(frontEdges[i].end)) {
 					if ((landmarkReachable[frontEdges[i].end][label][end] + nodeDist[frontEdges[i].end]) <= distance) {
 						return true;
@@ -558,6 +561,9 @@ public:
 				revNodeDist[backEdges[i].end] = revNodeDist[back] + 1;
 				if (backEdges[i].end == start) {
 					return (revNodeDist[end] <= distance);
+				}
+				if (nodeDist.find(backEdges[i].end) != nodeDist.end()) {
+					return ((revNodeDist[backEdges[i].end] + nodeDist[backEdges[i].end]) <= distance);
 				}
 				if (isReverseLandmarkVertex(backEdges[i].end)) {
 					if ((reverseLandmarkReachable[backEdges[i].end][label][start] + revNodeDist[backEdges[i].end]) <= distance) {
@@ -582,6 +588,9 @@ public:
 				if (frontEdges[i].end == end) {
 					return (nodeDist[end] <= distance);
 				}
+				if (revNodeDist.find(frontEdges[i].end) != revNodeDist.end()) {
+					return ((nodeDist[frontEdges[i].end] + revNodeDist[frontEdges[i].end]) <= distance);
+				}
 				if (isLandmarkVertex(frontEdges[i].end)) {
 					if ((landmarkReachable[frontEdges[i].end][label][end] + nodeDist[frontEdges[i].end]) <= distance) {
 						return true;
@@ -589,6 +598,7 @@ public:
 				}
 				q.push(frontEdges[i].end);
 			}
+
 		}
 		while (!revQ.empty()) {
 			string back = revQ.front();
@@ -604,6 +614,9 @@ public:
 				revNodeDist[backEdges[i].end] = revNodeDist[back] + 1;
 				if (backEdges[i].end == start) {
 					return (revNodeDist[end] <= distance);
+				}
+				if (nodeDist.find(backEdges[i].end) != nodeDist.end()) {
+					return ((revNodeDist[backEdges[i].end] + nodeDist[backEdges[i].end]) <= distance);
 				}
 				if (isReverseLandmarkVertex(backEdges[i].end)) {
 					if ((reverseLandmarkReachable[backEdges[i].end][label][start] + revNodeDist[backEdges[i].end]) <= distance) {
@@ -813,7 +826,7 @@ public:
 		cache = new boost::compute::detail::lru_cache<string, int>(getCacheSize());
 	}
 	int getCacheSize() {
-		return CACHE_CONSTRAINT * vertexSize;
+		return (2*CACHE_CONSTRAINT * vertexSize * labelSize);
 	}
 
 	//Assume for now that the method doing the modification in LRU cache is present, 
@@ -904,10 +917,10 @@ string **generateRandomQueries(Graph g, int numQueries) {
 		queries[i][1] = nodeIds[end];
 		queries[i][2] = g.labels[label];
 		queries[i][3] = std::to_string(distance);
-		// cout << queries[i][0] << endl;
-		// cout << queries[i][1] << endl;
-		// cout << queries[i][2] << endl;
-		// cout << queries[i][3] << endl;
+		cout << queries[i][0] << endl;
+		cout << queries[i][1] << endl;
+		cout << queries[i][2] << endl;
+		cout << queries[i][3] << endl;
 	}
 	return queries;
 }
@@ -924,7 +937,9 @@ Graph getGraph(int randomGraph) {
 		std::vector<Edge> edges;
 		std::vector<Node> nodes;
 		std::vector<string> labels;
-		cout << numVertices << " " << numLabels << " " << numEdges << endl;
+		if (DEBUG) {
+			cout << numVertices << " " << numLabels << " " << numEdges << endl;
+		}
 		printf("Enter all vertices\n");
 		for(int i = 0; i < numVertices; i++) {
 			string curr;
@@ -932,18 +947,24 @@ Graph getGraph(int randomGraph) {
 			if (curr == "") {
 				std::getline(std::cin, curr);
 			}
-			cout << curr << endl;
+			if (DEBUG) {
+				cout << curr << endl;
+			}
 			Node temp(curr);
 			nodes.push_back(temp);
 		}
-		cout << "Node size is " << nodes.size() << endl;
+		if (DEBUG) {
+			cout << "Node size is " << nodes.size() << endl;
+		}
 		printf("Enter all labels\n");
 		for(int i = 0; i < numLabels; i++) {
 			string curr;
 			std::getline(std::cin, curr);
 			labels.push_back(curr);
 		}
-		cout << "Label size is" << labels.size() << endl;
+		if (DEBUG) {
+			cout << "Label size is" << labels.size() << endl;
+		}
 		printf("Enter all edges in start end label format\n");
 		for(int i = 0; i < numEdges; i++) {
 			string start, end, label;
@@ -954,7 +975,9 @@ Graph getGraph(int randomGraph) {
 			Edge temp(start, end, label);
 			edges.push_back(temp);
 		}
-		printf("All edges entered, seg fault is in graph creation");
+		if (DEBUG) {
+			printf("All edges entered, seg fault is in graph creation");
+		}
 		return Graph(edges, nodes, labels, numVertices, numLabels);
 	}
 }
@@ -973,7 +996,7 @@ int main() {
 	LandmarkGraph lg = LandmarkGraph(g);
 	FanGraph fg = FanGraph(g);
 	
-	if (randomQueries > 0) {
+	if (randomQueries == 1) {
 		string **queries = generateRandomQueries(g, numQueries);
 		clock_t lgStart = clock();
 		for(int i = 0; i < numQueries; i++) {
@@ -981,7 +1004,7 @@ int main() {
 			bool lgReachable =  lg.isReachable(queries[i][0],queries[i][1],queries[i][2],stoi(queries[i][3]));
 		}
 		clock_t lgEnd = clock();
-		printf("Time taken for new algo = %lf\n", (double)(lgEnd - lgStart));
+		printf("Time taken for new algo = %lf\n", (double)(lgEnd - lgStart)/(double)(CLOCKS_PER_SEC));
 
 		clock_t fgStart = clock();
 		for(int i = 0; i < numQueries; i++) {
@@ -989,7 +1012,32 @@ int main() {
 			bool fgReachable =  fg.isReachable(queries[i][0],queries[i][1],queries[i][2],stoi(queries[i][3]));
 		}
 		clock_t fgEnd = clock();
-		printf("Time taken for old algo = %lf\n", (double)(fgEnd - fgStart));
+		printf("Time taken for old algo = %lf\n", (double)(fgEnd - fgStart)/(double)(CLOCKS_PER_SEC));
+	} else if (randomQueries == 2) {
+		//cout << "Reading queries from file" << endl;
+		string **queries = new string*[numQueries];
+		for(int i = 0; i < numQueries; i++) {
+			queries[i] = new string[4];
+			getline(std::cin, queries[i][0]);
+			getline(std::cin, queries[i][1]);
+			getline(std::cin, queries[i][2]);
+			getline(std::cin, queries[i][3]);
+		}
+		clock_t lgStart = clock();
+		for(int i = 0; i < numQueries; i++) {
+			//cout << "Query is " << queries[i][0] <<" " << queries[i][1] << " " << queries[i][2] << " " << queries[i][3] << endl; 
+			bool lgReachable =  lg.isReachable(queries[i][0],queries[i][1],queries[i][2],stoi(queries[i][3]));
+		}
+		clock_t lgEnd = clock();
+		printf("Time taken for new algo = %lf\n", (double)(lgEnd - lgStart)/(double)(CLOCKS_PER_SEC));
+
+		clock_t fgStart = clock();
+		for(int i = 0; i < numQueries; i++) {
+			//cout << "Query is " << queries[i][0] <<" " << queries[i][1] << " " << queries[i][2] << " " << queries[i][3] << endl; 
+			bool fgReachable =  fg.isReachable(queries[i][0],queries[i][1],queries[i][2],stoi(queries[i][3]));
+		}
+		clock_t fgEnd = clock();
+		printf("Time taken for old algo = %lf\n", (double)(fgEnd - fgStart)/(double)(CLOCKS_PER_SEC));
 	} else {
 		string start, end, label, distance;
 		printf("Enter queries in start, end, label and distance format\n");
